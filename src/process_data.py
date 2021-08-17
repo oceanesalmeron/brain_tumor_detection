@@ -25,8 +25,11 @@ def build_dataset() -> pd.DataFrame:
             labels.append(os.path.basename(path))
             paths.append(os.path.join(path, name))
 
-    df = pd.DataFrame({'paths': paths, 'labels': labels})
-    return df.iloc[1: , :]
+    # df = pd.DataFrame({'paths': paths, 'labels': labels})
+    # return df.iloc[1: , :]
+    paths.pop(0)
+    labels.pop(0)
+    return paths, labels
 
 
 def process_images(img_paths: pd.Series) -> pd.Series:
@@ -52,4 +55,4 @@ if __name__ == '__main__':
     data = build_dataset()
     data['data'] = process_images(data['paths'])
     data['labels'], labels = data['labels'].factorize()
-    print(data.head())
+    print(data.head(-10))

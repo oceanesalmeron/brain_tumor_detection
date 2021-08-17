@@ -1,12 +1,22 @@
+import numpy as np
+
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelBinarizer
+
+from tensorflow.keras.utils import to_categorical
 from tensorflow.keras.models import Model
 from tensorflow.keras.layers import Input, AveragePooling2D, Flatten, Dense, Dropout
+from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.applications import VGG16
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
-def build_model() -> None:
+from src.process_data import build_dataset, process_images
+
+def build_model():
     """
     Build model. #TODO
     """
-    baseline_model = VGG16(weights="imagenet", include_top=False,input_tensor=Input(shape=(224, 224, 3)))
+    baseline_model = VGG16(weights="imagenet", include_top=False, input_tensor=Input(shape=(224, 224, 3)))
 
     headline_model = baseline_model.output
     headline_model = AveragePooling2D(pool_size=(4, 4))(headline_model)
@@ -17,8 +27,45 @@ def build_model() -> None:
 
     return Model(inputs=baseline_model.input, outputs=headline_model)
 
+def compile_model(model, learning_rate, epochs):
+    opt = Adam(learning_rate=learning_rate, decay=learning_rate / epochs)
+    return model.compile(loss="binary_crossentropy", optimizer=opt, metrics=["accuracy"])
+
 
 if __name__ == '__main__':
+    batch_size = 8
+    learning_rate = 0.001
+    epochs = 25
+
+    print('-> Building dataset.')
+    X, y = build_dataset()
+    X = process_images(X)
+    # y, labels = y.factorize()
+    lb = LabelBinarizer()
+    y = lb.fit_transform(y)
+    y = to_categorical(y)
+    X = np.array(X)
+    y = np.array(y)
+    print('x:', len(X.shape), 'y:', len(y.shape))
+
+    print('-> Spliting into train/test.')
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=1)
+
+    trainAug = ImageDataGenerator(rotation_range=15, fill_mode="nearest")
+
+    print('-> Building model.')
     test = build_model()
-    print(type(test))
-    print(test.summary())
+    print('-> Compiling model.')
+    opt = Adam(learning_rate=learning_rate, decay=learning_rate / epochs)
+    test.compile(loss="binary_crossentropy", optimizer=opt, metrics=["accuracy"])
+    print('-> Fitting.')
+    test.fit(
+        trainAug.flow(X_train, y_train, batch_size=batch_size),
+        steps_per_epoch=len(X_train) // batch_size,
+        validation_data=(X_test, y_test),
+        validation_steps=len(X_test) // batch_size,
+        epochs=epochs
+    )
+
+    test.save('./model/brain_tumor_detector')
+    # print(X_train)
