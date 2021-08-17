@@ -34,7 +34,7 @@ def compile_model(model, learning_rate, epochs):
 
 if __name__ == '__main__':
     batch_size = 8
-    learning_rate = 0.001
+    learning_rate = 0.0001
     epochs = 25
 
     print('-> Building dataset.')
@@ -44,7 +44,7 @@ if __name__ == '__main__':
     lb = LabelBinarizer()
     y = lb.fit_transform(y)
     y = to_categorical(y)
-    X = np.array(X)
+    X = np.array(X)/255.0
     y = np.array(y)
     print('x:', len(X.shape), 'y:', len(y.shape))
 
