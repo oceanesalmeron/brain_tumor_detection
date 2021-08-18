@@ -51,6 +51,13 @@ def process_images(img_paths: pd.Series) -> pd.Series:
     return images
 
 
+def process_image(img_path):
+    # img = cv2.imread(img_path)
+    img = cv2.cvtColor(img_path, cv2.COLOR_BGR2RGB)
+    img = cv2.resize(img, (224,224))
+    return img
+
+
 if __name__ == '__main__':
     data = build_dataset()
     data['data'] = process_images(data['paths'])
