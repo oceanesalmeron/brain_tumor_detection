@@ -18,6 +18,7 @@ matplotlib = "^3.4.3"
 opencv-python = "^4.0.3"
 sklearn = "^0.0"
 streamlit = "^0.86.0"
+black = "^21.7b0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
