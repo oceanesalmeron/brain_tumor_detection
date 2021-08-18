@@ -37,7 +37,7 @@ def compile_model(model, learning_rate, epochs):
 
 if __name__ == '__main__':
     batch_size = 8
-    learning_rate = 0.001
+    learning_rate = 0.0001
     epochs = 25
 
     print('-> Building dataset.')

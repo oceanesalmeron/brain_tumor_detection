@@ -5,7 +5,6 @@ import cv2
 from src.process_data import build_dataset, process_images
 
 path='./data/no/No11.jpg'
-path='./data/yes/Y1.jpg'
 img = cv2.imread(path)
 img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 img = cv2.resize(img, (224,224))
