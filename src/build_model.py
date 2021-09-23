@@ -1,4 +1,5 @@
 import numpy as np
+import pickle
 
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelBinarizer
@@ -9,12 +10,19 @@ from tensorflow.keras.layers import Input, AveragePooling2D, Flatten, Dense, Dro
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.applications import VGG16
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
+from tensorflow.keras.callbacks import History
+
+import matplotlib.pyplot as plt
 
 from src.process_data import build_dataset, process_images
 
-def build_model():
+def build_model() -> Model:
     """
     Build model. #TODO
+
+    Returns
+    -------
+    Built model.
     """
     baseline_model = VGG16(weights="imagenet", include_top=False, input_tensor=Input(shape=(224, 224, 3)))
 
@@ -30,46 +38,56 @@ def build_model():
 
     return Model(inputs=baseline_model.input, outputs=headline_model)
 
-def compile_model(model, learning_rate, epochs):
-    opt = Adam(learning_rate=learning_rate, decay=learning_rate / epochs)
-    return model.compile(loss="binary_crossentropy", optimizer=opt, metrics=["accuracy"])
+
+def save_model(model: Model, history: History) -> None:
+    """
+    Save a given model and its history in file.
+
+    Parameters
+    ----------
+    model
+        Model you want to save.
+    history
+        Model history.
+    """
+    model.save('./model/19-08-2021-3/brain_tumor_detector.h5')
+
+    with open('./model/19-08-2021-3/history', 'wb') as f:
+        pickle.dump(history.history, f)
 
 
-if __name__ == '__main__':
-    batch_size = 8
-    learning_rate = 0.0001
-    epochs = 25
+def plot_performance(history: History) -> None:
+    """
+    Plot your model performance for better visualization.
 
-    print('-> Building dataset.')
-    X, y = build_dataset()
-    X = process_images(X)
-    # y, labels = y.factorize()
-    lb = LabelBinarizer()
-    y = lb.fit_transform(y)
-    y = to_categorical(y)
-    X = np.array(X)/255.0
-    y = np.array(y)
-    print('x:', len(X.shape), 'y:', len(y.shape))
+    Parameters
+    ----------
+    history
+        History of the model you want to plot performance.
+    """
+    accuracy = history.history['accuracy']
+    val_accuracy = history.history['val_accuracy']
+    loss = history.history['loss']
+    val_loss = history.history['val_loss']
+    epochs_range = range(1, len(history.epoch) + 1)
 
-    print('-> Spliting into train/test.')
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=1)
-    X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=0.2, random_state=1)
+    plt.figure(figsize=(15,5))
 
-    trainAug = ImageDataGenerator(rotation_range=15, fill_mode="nearest")
+    plt.subplot(1, 2, 1)
+    plt.plot(epochs_range, accuracy, label='Train Set')
+    plt.plot(epochs_range, val_accuracy, label='Validation Set')
+    plt.legend(loc="best")
+    plt.xlabel('Epochs')
+    plt.ylabel('Accuracy')
+    plt.title('Model Accuracy')
 
-    print('-> Building model.')
-    test = build_model()
-    print('-> Compiling model.')
-    opt = Adam(learning_rate=learning_rate, decay=learning_rate / epochs)
-    test.compile(loss="binary_crossentropy", optimizer=opt, metrics=["accuracy"])
-    print('-> Fitting.')
-    test.fit_generator(
-        trainAug.flow(X_train, y_train, batch_size=batch_size),
-        steps_per_epoch=len(X_train) // batch_size,
-        validation_data=(X_val, y_val),
-        validation_steps=len(X_val) // batch_size,
-        epochs=epochs
-    )
+    plt.subplot(1, 2, 2)
+    plt.plot(epochs_range, loss, label='Train Set')
+    plt.plot(epochs_range, val_loss, label='Validation Set')
+    plt.legend(loc="best")
+    plt.xlabel('Epochs')
+    plt.ylabel('Loss')
+    plt.title('Model Loss')
 
-    test.save('./model/18-08-2021-2/brain_tumor_detector')
-    # print(X_train)
+    plt.tight_layout()
+    plt.show()

@@ -5,7 +5,6 @@ This project aims to predict if a patient has a brain tumor or not based on mri 
 ## Table of Contents
 
 * [Repository Structure](#repository-structure)
-* [Configuration Files](#configuration-files)
 * [Development](#development)
 
 ## Repository Structure
@@ -14,7 +13,7 @@ This project aims to predict if a patient has a brain tumor or not based on mri 
 .
 ├── app                     # Streamlit app
 ├── bin                     # Contains entrypoints
-├── data                    # Devops part of the project
+├── data                    # Project data
 ├── src                     # All the project code
 └── tests                   # Unit and integration tests
 ```

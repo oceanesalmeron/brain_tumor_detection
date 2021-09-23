@@ -19,9 +19,13 @@ opencv-python = "^4.0.3"
 sklearn = "^0.0"
 streamlit = "^0.86.0"
 black = "^21.7b0"
+click=">=7.0,<8.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
+
+[tool.poetry.scripts]
+train = "bin.train:cli"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
